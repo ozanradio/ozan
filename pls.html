@@ -1,0 +1,76 @@
+<! DOCTYPE html>
+<html>
+<head>
+<title>PLS Processor</title>
+</head>
+<body>
+<p>Audio PLS processor<p>
+<audio id="audio" controls="controls"></audio >
+<p id="title">item title</p>
+
+<script>
+// Make XHR request for the pls file
+if (window.XMLHttpRequest) {
+    // code for IE7 +, Firefox, Chrome, Opera, Safari
+    xhr = new XMLHttpRequest();
+} else {
+    // code for IE6, IE5
+    xhr = new ActiveXObject("Microsoft.XMLHTTP");
+}
+xhr.open("GET", "http://listen.di.fm/public3/chillout.pls", false);
+xhr.send();
+xhrDoc = xhr.responseText;
+
+var pls = {};
+
+// split into lines
+pls.Entries = xhrDoc.split("\n");
+// Entry 0 is [playlist]
+// Entry 1 is NumberOfEntries=n
+pls.Count = pls.Entries[1].split("=")[1];
+// Entry 2,3,4 = File#=,Title#=,Length#=
+// repeat from 1 to NumberOfEntries
+
+pls.Items = [];
+pls.curItem = 0;
+pls.listOk = true;
+for (var i = 0; i < pls.Count; i ++ ) {
+    pls.Items.push( {
+        file: pls.Entries[i + 2].split("=")[1],
+        title: pls.Entries[i + 3].split("=")[1],
+        length: pls.Entries[i + 4].split("=")[1]
+        });
+}
+// get the audio element
+pls.audio = document.getElementById("audio");
+
+// hook onEnded and onError events to jump to next PLS item
+pls.audio.addEventListener("error", audioEvent, false);
+pls.audio.addEventListener("ended", audioEvent, false);
+
+// load audio tag with first source
+pls.listOk = loadPLS(pls.curItem ++ );
+
+function audioEvent(event) {
+    // if the listOk is still true (ie not at the end of the list)
+    // step to the next item either on ended or error
+    if (pls.listOk) {
+        pls.listOk = loadPLS(pls.curItem ++ );
+    } else {
+        // action to indicate end of stream    
+    }
+}
+function loadPLS(whichItem) {
+    if (whichItem >= pls.Count) {
+        return false;
+    } else {
+        pls.audio.autoplay = false;
+        pls.audio.src = pls.Items[whichItem].file;
+        var title = document.getElementById("title");
+        title.innerText = pls.Items[whichItem].title + "[" + pls.curItem + "/" + pls.Items[whichItem].file + "]";
+        return true;
+    }
+}
+</script>
+</body>
+</html>
