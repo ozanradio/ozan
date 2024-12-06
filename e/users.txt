@@ -1,0 +1,4 @@
+[
+    {"email": "user1@example.com", "cashback": 5.00},
+    {"email": "user2@example.com", "cashback": 10.00}
+]
