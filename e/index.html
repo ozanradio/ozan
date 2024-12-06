@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashback System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        form { margin-bottom: 20px; }
+        label { display: block; margin-top: 10px; }
+        input[type="text"], input[type="email"] { width: 100%; padding: 8px; margin-top: 5px; }
+        button { padding: 10px 20px; margin-top: 20px; }
+        .cashback-info { margin-top: 30px; padding: 20px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cashback System</h1>
+        <form id="register-form">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+            <button type="submit">Register and Download Wallet Card</button>
+        </form>
+
+        <div class="cashback-info" id="cashback-info">
+            <h2>Your Cashback Balance</h2>
+            <p id="balance">$0.00</p>
+        </div>
+    </div>
+
+    <script>
+        const cashbackKey = "userCashback";
+
+        // Load cashback balance from localStorage
+        let cashbackBalance = parseFloat(localStorage.getItem(cashbackKey)) || 0;
+        document.getElementById('balance').innerText = `$${cashbackBalance.toFixed(2)}`;
+
+        // Registration form submission
+        document.getElementById('register-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+
+            // Mock Wallet Card (download)
+            const walletCard = `Name: ${name}\nEmail: ${email}\nCashback Balance: $${cashbackBalance.toFixed(2)}`;
+            const blob = new Blob([walletCard], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${name}_Wallet_Card.txt`;
+            link.click();
+
+            alert(`Welcome, ${name}! You are now registered.`);
+        });
+
+        // Listen for cashback updates from admin.html
+        window.addEventListener('storage', () => {
+            cashbackBalance = parseFloat(localStorage.getItem(cashbackKey)) || 0;
+            document.getElementById('balance').innerText = `$${cashbackBalance.toFixed(2)}`;
+        });
+    </script>
+</body>
+</html>
