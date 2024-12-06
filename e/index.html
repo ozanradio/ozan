@@ -3,62 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cashback System</title>
+    <title>Customer Registration</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .container { max-width: 600px; margin: auto; }
         form { margin-bottom: 20px; }
         label { display: block; margin-top: 10px; }
-        input[type="text"], input[type="email"] { width: 100%; padding: 8px; margin-top: 5px; }
-        button { padding: 10px 20px; margin-top: 20px; }
-        .cashback-info { margin-top: 30px; padding: 20px; border: 1px solid #ddd; }
+        input, button { width: 100%; padding: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Cashback System</h1>
+        <h1>Register as a Customer</h1>
         <form id="register-form">
             <label for="name">Name:</label>
             <input type="text" id="name" required>
             <label for="email">Email:</label>
             <input type="email" id="email" required>
-            <button type="submit">Register and Download Wallet Card</button>
+            <button type="submit">Register</button>
         </form>
-
-        <div class="cashback-info" id="cashback-info">
-            <h2>Your Cashback Balance</h2>
-            <p id="balance">$0.00</p>
-        </div>
+        <textarea id="file-content" style="width: 100%; height: 150px;" readonly></textarea>
     </div>
 
     <script>
-        const cashbackKey = "userCashback";
+        let usersData = []; // Kullanıcıları tutan global array
 
-        // Load cashback balance from localStorage
-        let cashbackBalance = parseFloat(localStorage.getItem(cashbackKey)) || 0;
-        document.getElementById('balance').innerText = `$${cashbackBalance.toFixed(2)}`;
-
-        // Registration form submission
-        document.getElementById('register-form').addEventListener('submit', function (e) {
+        // Kullanıcı kaydı
+        document.getElementById("register-form").addEventListener("submit", function (e) {
             e.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
 
-            // Mock Wallet Card (download)
-            const walletCard = `Name: ${name}\nEmail: ${email}\nCashback Balance: $${cashbackBalance.toFixed(2)}`;
-            const blob = new Blob([walletCard], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${name}_Wallet_Card.txt`;
-            link.click();
+            // Yeni kullanıcı oluştur
+            const newUser = { name, email, cashback: 0.00 };
 
-            alert(`Welcome, ${name}! You are now registered.`);
+            // Varolan kullanıcıyı kontrol et
+            if (usersData.some(user => user.email === email)) {
+                alert("This email is already registered.");
+                return;
+            }
+
+            // Yeni kullanıcıyı listeye ekle
+            usersData.push(newUser);
+
+            // Güncellenmiş veriyi göster
+            document.getElementById("file-content").value = JSON.stringify(usersData, null, 2);
+
+            alert("Registration successful!");
         });
 
-        // Listen for cashback updates from admin.html
-        window.addEventListener('storage', () => {
-            cashbackBalance = parseFloat(localStorage.getItem(cashbackKey)) || 0;
-            document.getElementById('balance').innerText = `$${cashbackBalance.toFixed(2)}`;
+        // Güncellenmiş dosyayı indir
+        document.getElementById("file-content").addEventListener("change", function () {
+            const blob = new Blob([JSON.stringify(usersData, null, 2)], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "users.txt";
+            link.click();
         });
     </script>
 </body>
