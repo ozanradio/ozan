@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashback System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        form { margin-bottom: 20px; }
+        label { display: block; margin-top: 10px; }
+        input, button { width: 100%; padding: 10px; margin-top: 10px; }
+        textarea { width: 100%; height: 150px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cashback System</h1>
+
+        <!-- Dosya Yükleme -->
+        <form id="upload-form">
+            <label for="file">Upload Users File (TXT):</label>
+            <input type="file" id="file" accept=".txt" required>
+            <button type="submit">Load Users</button>
+        </form>
+
+        <!-- Kullanıcı Ekleme -->
+        <form id="add-user-form" style="display:none;">
+            <label for="email">Customer Email:</label>
+            <input type="email" id="email" placeholder="Enter email" required>
+            <label for="amount">Bill Amount:</label>
+            <input type="number" id="amount" placeholder="Enter bill amount" required>
+            <button type="submit">Add Cashback</button>
+        </form>
+
+        <!-- Güncellenmiş Dosyayı İndirme -->
+        <button id="download-btn" style="display:none;">Download Updated File</button>
+
+        <!-- Dosya İçeriği -->
+        <textarea id="file-content" readonly></textarea>
+    </div>
+
+    <script>
+        let usersData = []; // Kullanıcıları tutan global array
+
+        // TXT dosyasını yükle
+        document.getElementById("upload-form").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const file = document.getElementById("file").files[0];
+
+            if (!file) {
+                alert("Please upload a valid TXT file.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function () {
+                const content = reader.result;
+                usersData = content ? JSON.parse(content) : [];
+                document.getElementById("file-content").value = JSON.stringify(usersData, null, 2);
+                document.getElementById("add-user-form").style.display = "block";
+                document.getElementById("download-btn").style.display = "block";
+            };
+            reader.readAsText(file);
+        });
+
+        // Kullanıcı ekle ve cashback güncelle
+        document.getElementById("add-user-form").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const amount = parseFloat(document.getElementById("amount").value);
+
+            // Kullanıcıyı ara
+            let user = usersData.find(u => u.email === email);
+
+            if (user) {
+                // Cashback güncelle
+                user.cashback += (amount * 0.05);
+            } else {
+                // Yeni kullanıcı oluştur
+                usersData.push({ email, cashback: (amount * 0.05) });
+            }
+
+            // Dosya içeriğini güncelle
+            document.getElementById("file-content").value = JSON.stringify(usersData, null, 2);
+            alert(`Cashback updated for ${email}`);
+        });
+
+        // Güncellenmiş dosyayı indir
+        document.getElementById("download-btn").addEventListener("click", function () {
+            const blob = new Blob([JSON.stringify(usersData, null, 2)], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "users.txt";
+            link.click();
+        });
+    </script>
+</body>
+</html>
